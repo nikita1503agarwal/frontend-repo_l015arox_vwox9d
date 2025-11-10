@@ -8,18 +8,20 @@ function App() {
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [draft, setDraft] = useState(null);
   const [status, setStatus] = useState('idle');
+  const [orderId, setOrderId] = useState(null);
 
   function handleBookingSubmit(payload) {
     setDraft(payload);
+    setStatus('idle');
+    setOrderId(null);
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
 
-  function handleConfirmPayment({ method }) {
-    setStatus('processing');
-    // For now, we simulate a confirmation without backend; integration can be added later.
-    setTimeout(() => {
+  function handleConfirmPayment({ method, orderId }) {
+    if (method === 'paypal' && orderId) {
+      setOrderId(orderId);
       setStatus('confirmed');
-    }, 800);
+    }
   }
 
   return (
@@ -32,7 +34,7 @@ function App() {
       {status === 'confirmed' && (
         <div className="mx-auto max-w-3xl px-6 pb-16">
           <div className="rounded-xl border bg-green-50 p-6 text-green-800">
-            Votre demande a été enregistrée. Vous recevrez un SMS de confirmation avec la facture et le lien de paiement.
+            Paiement confirmé via PayPal. Votre rendez-vous est réservé. Numéro de transaction: {orderId}
           </div>
         </div>
       )}

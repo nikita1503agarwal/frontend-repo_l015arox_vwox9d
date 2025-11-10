@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Shield, Phone, Calendar } from 'lucide-react';
+import { Shield, Calendar } from 'lucide-react';
+import PayPalButton from './PayPalButton';
 
 export default function PaymentPanel({ draft, onConfirm }) {
   const isQuote = draft?.offerId === 'formule-3';
@@ -32,39 +33,30 @@ export default function PaymentPanel({ draft, onConfirm }) {
             ))}
           </dl>
           <div className="mt-6 rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
-            Les confirmations et la gestion (annulation/modification) se font par SMS ou WhatsApp.
+            Le rendez-vous est confirmé automatiquement après paiement.
           </div>
         </div>
 
         <div className="rounded-2xl border bg-white p-6">
-          <h3 className="text-xl font-bold text-gray-900">Paiement & Confirmation</h3>
+          <h3 className="text-xl font-bold text-gray-900">Paiement</h3>
           {isQuote ? (
             <div className="mt-4 text-sm text-gray-700">
               Pour les événements, nous vous contactons rapidement pour établir un devis personnalisé.
             </div>
           ) : (
-            <div className="mt-4 space-y-3 text-sm text-gray-700">
-              <p>Choisissez votre méthode de paiement. Une confirmation par SMS vous sera envoyée avec la facture.</p>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => onConfirm?.({ method: 'paypal' })}
-                  className="rounded-lg border px-4 py-2 font-semibold hover:bg-gray-50"
-                >
-                  PayPal
-                </button>
-                <button
-                  onClick={() => onConfirm?.({ method: 'wise' })}
-                  className="rounded-lg border px-4 py-2 font-semibold hover:bg-gray-50"
-                >
-                  Wise (virement)
-                </button>
-              </div>
+            <div className="mt-4 space-y-4 text-sm text-gray-700">
+              <p>Régler par PayPal pour valider immédiatement votre créneau.</p>
+              <PayPalButton
+                amount={draft.amount}
+                currency={draft.currency || 'EUR'}
+                onApprove={({ orderId }) => onConfirm?.({ method: 'paypal', orderId })}
+                onError={(err) => alert('Erreur PayPal: ' + (err?.message || 'inconnue'))}
+              />
             </div>
           )}
 
           <div className="mt-6 grid gap-3 text-sm text-gray-600">
             <div className="inline-flex items-center gap-2"><Shield className="h-4 w-4"/> Paiement sécurisé</div>
-            <div className="inline-flex items-center gap-2"><Phone className="h-4 w-4"/> Confirmation par SMS / WhatsApp</div>
             <div className="inline-flex items-center gap-2"><Calendar className="h-4 w-4"/> Créneau ajouté à votre agenda</div>
           </div>
         </div>
