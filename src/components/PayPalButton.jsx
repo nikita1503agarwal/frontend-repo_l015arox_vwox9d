@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Lightweight PayPal Smart Buttons wrapper. Uses Sandbox with client-id=test.
+// Lightweight PayPal Smart Buttons wrapper. Uses env client-id when provided, fallback to sandbox test.
 export default function PayPalButton({ amount, currency = 'EUR', onApprove, onError }) {
   const containerRef = useRef(null);
   const [ready, setReady] = useState(false);
+  const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test';
 
   useEffect(() => {
-    // If PayPal already loaded, render immediately
+    // If PayPal already loaded with same client-id, render immediately
     if (window.paypal) {
       setReady(true);
       return;
     }
     // Inject script
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=test&currency=${currency}`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=${currency}`;
     script.async = true;
     script.onload = () => setReady(true);
     script.onerror = () => onError?.(new Error('Échec de chargement de PayPal'));
@@ -21,7 +22,7 @@ export default function PayPalButton({ amount, currency = 'EUR', onApprove, onEr
     return () => {
       // don't remove script to avoid reloading between HMR updates
     };
-  }, [currency, onError]);
+  }, [currency, onError, clientId]);
 
   useEffect(() => {
     if (!ready || !window.paypal || !containerRef.current) return;
@@ -71,6 +72,9 @@ export default function PayPalButton({ amount, currency = 'EUR', onApprove, onEr
       <div ref={containerRef} />
       {!ready && (
         <div className="mt-2 text-sm text-gray-500">Chargement de PayPal…</div>
+      )}
+      {clientId === 'test' && (
+        <div className="mt-2 text-xs text-gray-400">Mode sandbox actif. Ajoutez VITE_PAYPAL_CLIENT_ID pour passer en production.</div>
       )}
     </div>
   );
